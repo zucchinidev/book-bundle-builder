@@ -1,0 +1,33 @@
+{
+  "name": "book-manager",
+  "version": "1.0.0",
+  "description": "",
+  "main": ".eslintrc.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "jest --config test/jest.conf.js",
+    "test:coverage": "jest --config test/jest.conf.js --coverage",
+    "lint": "eslint src/**"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "commander": "^2.19.0",
+    "node-dir": "^0.1.17",
+    "request": "^2.88.0"
+  },
+  "devDependencies": {
+    "eslint": "5.3.0",
+    "eslint-config-standard": "11.0.0",
+    "eslint-plugin-import": "2.14.0",
+    "eslint-plugin-jest": "21.21.0",
+    "eslint-plugin-node": "7.0.1",
+    "eslint-plugin-promise": "3.8.0",
+    "eslint-plugin-standard": "3.1.0",
+    "jest": "23.5.0"
+  }
+}
