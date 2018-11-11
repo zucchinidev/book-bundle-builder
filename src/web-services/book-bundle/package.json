@@ -1,0 +1,35 @@
+{
+  "name": "book-manager-web-services",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "start-dev": "node_modules/nodemon/bin/nodemon.js server.js",
+    "test": "jest --config test/jest.conf.js",
+    "test:coverage": "jest --config test/jest.conf.js --coverage",
+    "lint": "eslint src/**"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "4.16.4",
+    "morgan": "1.9.1",
+    "nconf": "0.10.0"
+  },
+  "devDependencies": {
+    "eslint": "5.3.0",
+    "eslint-config-standard": "11.0.0",
+    "eslint-plugin-import": "2.14.0",
+    "eslint-plugin-jest": "21.21.0",
+    "eslint-plugin-node": "7.0.1",
+    "eslint-plugin-promise": "3.8.0",
+    "eslint-plugin-standard": "3.1.0",
+    "jest": "23.5.0",
+    "nodemon": "1.18.6"
+  }
+}
