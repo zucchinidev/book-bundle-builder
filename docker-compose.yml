@@ -1,19 +1,35 @@
 version: '2.2'
 services:
   elasticsearch:
-      build:
-        context: docker/elasticsearch/
-      volumes:
-        - ./docker/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
-      ports:
-        - "9200:9200"
-        - "9300:9300"
-      environment:
-        ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-      networks:
-        nodejs:
-          aliases:
-            - elasticsearch
+    build:
+      context: docker/elasticsearch/
+    volumes:
+    - ./docker/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    ports:
+    - "9200:9200"
+    - "9300:9300"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      nodejs:
+        aliases:
+        - elasticsearch
+
+  node:
+    build:
+      context: src/web-services/book-bundle
+      args:
+        app_env: ${APP_ENV}
+    volumes:
+    - ./src/web-services/book-bundle:/usr/src/app
+    - ./src/web-services/book-bundle/node_modules:/usr/src/app/node_modules
+    ports:
+    - "8080:8080"
+    command: npm run start-dev
+    networks:
+      nodejs:
+        aliases:
+        - web-service
 
 networks:
   nodejs:
