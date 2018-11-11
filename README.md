@@ -1,4 +1,4 @@
-# Book-manager
+# Book-manager - Project Gutenberg
 
 
 ## Initializing project.
