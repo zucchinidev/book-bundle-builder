@@ -1,7 +1,7 @@
 {
   "port": 8080,
   "elasticsearch": {
-    "host": "localhost",
+    "host": "elasticsearch",
     "port": 9200,
     "books_index": "books",
     "bundles_index": "book-bundle"
