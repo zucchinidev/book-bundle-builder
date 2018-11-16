@@ -8,34 +8,36 @@ function getUrl ({ host = required('host'), port = required('port'), books_index
 }
 
 function getHitsByField (esConf) {
-  return function (req, res) {
-    const body = {
-      size: 10,
-      query: {
-        match: {
-          [req.params.field]: req.params.query
-        }
+  return async function (req, res) {
+    try {
+      const body = {
+        size: 10,
+        query: { match: { [req.params.field]: req.params.query } }
       }
+      const esRes = await request.get({ url: getUrl(esConf), json: true, body })
+      res.status(200).json(esRes.hits.hits.map(({ _source }) => _source))
+    } catch (err) {
+      res.status(err.statusCode || 502).json(err.error)
     }
-    request.get({ url: getUrl(esConf), json: true, body })
-      .then(esResBody => res.status(200).json(esResBody.hits.hits.map(({ _source }) => _source)))
-      .catch(({ error }) => res.status(error.status || 502))
   }
 }
 
 function getSuggestionsByField (esConf) {
-  return function (req, res) {
-    const { query: text, field } = req.params
-    const suggestMode = 'always'
-    const body = {
-      size: 0, //  Setting the size parameter to zero informs Elasticsearch that we don’t want any matching documents returned, just the suggestions
-      suggest: {
-        suggestions: { text, term: { field, suggest_mode: suggestMode } }
+  return async function (req, res) {
+    try {
+      const { query: text, field } = req.params
+      const suggestMode = 'always'
+      const body = {
+        size: 0, //  Setting the size parameter to zero informs Elasticsearch that we don’t want any matching documents returned, just the suggestions
+        suggest: {
+          suggestions: { text, term: { field, suggest_mode: suggestMode } }
+        }
       }
+      const esResBody = await request.get({ url: getUrl(esConf), json: true, body })
+      res.status(200).json(esResBody.suggest.suggestions)
+    } catch (err) {
+      res.status(err.statusCode || 502).json(err.error)
     }
-    request.get({ url: getUrl(esConf), json: true, body })
-      .then(esResBody => res.status(200).json(esResBody.suggest.suggestions))
-      .catch(({ error }) => res.status(error.status || 502).json(error))
   }
 }
 
