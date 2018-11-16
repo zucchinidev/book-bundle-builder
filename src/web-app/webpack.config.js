@@ -3,10 +3,11 @@
 const webpack = require('webpack')
 const path = require('path')
 const distDir = path.resolve(__dirname, 'dist')
+const entry = path.resolve(__dirname, './app/index.ts')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
-  entry: './entry.js',
+  entry,
   output: {
     filename: 'bundle.js',
     path: distDir
@@ -15,8 +16,15 @@ module.exports = {
     contentBase: distDir,
     port: 60800
   },
+  resolve: {
+    extensions: ['.js', '.ts']
+  },
   module: {
     rules: [
+      {
+        test: /\.ts$/,
+        use: 'ts-loader'
+      },
       {
         test: /\.css$/,
         use: ['style-loader', 'css-loader']

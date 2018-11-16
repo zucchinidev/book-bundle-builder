@@ -1,10 +1,4 @@
-'use strict'
-
-import './node_modules/bootstrap/dist/css/bootstrap.min.css'
-import 'bootstrap'
-
-const $ = document.body.querySelector.bind(document.body)
-document.body.innerHTML = `
+export const main = `
 <div class="container"> 
   <h1>B4 - Book Bundler</h1>
   <div class="b4-alerts"></div> 
@@ -12,18 +6,14 @@ document.body.innerHTML = `
 </div>
 `
 
-const mainElement = $('.b4-main')
-
-mainElement.innerHTML = `
+export const welcome = `
 <div class="jumbotron">
   <h1>Welcome!</h1>
   <p>B4 is an application for creating book bundles.</p>  
 </div>
 `
 
-const alertsElement = $('.b4-alerts')
-
-alertsElement.innerHTML = `
+export const alert = `
 <div class="alert alert-success alert-dismissable fade in" role="alert">
   <button class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span> 
