@@ -31,7 +31,23 @@ function getBundleById (esConf) {
   }
 }
 
+function setBundleName (esConf) {
+  return async function (req, res) {
+    try {
+      const url = `${getUrl(esConf)}/${req.params.id}`
+      const options = { url, json: true }
+      const bundle = (await request(options))._source
+      bundle.name = req.params.name
+      const esRes = await request.put({ ...options, body: bundle })
+      res.status(209).json(esRes)
+    } catch (err) {
+      res.status(err.statusCode || 502).json(err.error)
+    }
+  }
+}
+
 module.exports = (app, esConf) => {
   app.post('/api/bundle', createBundle(esConf))
   app.get('/api/bundle/:id', getBundleById(esConf))
+  app.put('/api/bundle/:id/name/:name', setBundleName(esConf))
 }
