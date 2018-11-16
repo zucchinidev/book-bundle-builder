@@ -1,12 +1,21 @@
 'use strict'
 
-const request = require('request')
+const request = require('request-promise')
 
-const elasticsearchConfiguration = {}
+function requiredParam (param) {
+  throw new Error(`Param ${param} is mandatory`)
+}
 
-module.exports = (app, { host, port, books_index } = elasticsearchConfiguration) => {
-  const url = `http://${host}:${port}/${books_index}/book/_search`
-  app.get('/api/search/books/:field/:query', (req, res) => {
+function getUrl ({
+                   host = requiredParam('port'),
+                   port = requiredParam('port'),
+                   books_index = requiredParam('books_index')
+                 }) {
+  return `http://${host}:${port}/${books_index}/book/_search`
+}
+
+function getHitsByField (esConf) {
+  return function (req, res) {
     const body = {
       size: 10,
       query: {
@@ -15,51 +24,29 @@ module.exports = (app, { host, port, books_index } = elasticsearchConfiguration)
         }
       }
     }
-    const options = { url, json: true, body }
-    request.get(options, (err, esRes, esResBody) => {
-      if (err) {
-        return res.status(502).json({
-          error: 'BAD_GATEWAY',
-          reason: err.code
-        })
-      }
-      if (esRes.statusCode !== 200) {
-        return res.status(esRes.statusCode).json(esResBody)
-      }
+    request.get({ url: getUrl(esConf), json: true, body })
+      .then(esResBody => res.status(200).json(esResBody.hits.hits.map(({ _source }) => _source)))
+      .catch(({ error }) => res.status(error.status || 502))
+  }
+}
 
-      res.status(200).json(esResBody.hits.hits.map(({ _source }) => _source))
-    })
-  })
-
-  app.get('/api/suggest/:field/:query', (req, res) => {
+function getSuggestionsByField (esConf) {
+  return function (req, res) {
+    const { query: text, field } = req.params
+    const suggestMode = 'always'
     const body = {
       size: 0, //  Setting the size parameter to zero informs Elasticsearch that we don’t want any matching documents returned, just the suggestions
       suggest: {
-        suggestions: {
-          text: req.params.query,
-          term: {
-            field: req.params.field,
-            suggest_mode: 'always',
-          },
-        }
+        suggestions: { text, term: { field, suggest_mode: suggestMode } }
       }
     }
-    const options = { url, json: true, body }
-    new Promise((resolve, reject) => {
-      request.get(options, (err, esRes, esResBody) => {
-        if (err) {
-          reject({ error: err })
-          return
-        }
-        if (esRes.statusCode !== 200) {
-          reject({ error: esResBody })
-          return
-        }
-        resolve(esResBody)
-      })
-    })
+    request.get({ url: getUrl(esConf), json: true, body })
       .then(esResBody => res.status(200).json(esResBody.suggest.suggestions))
       .catch(({ error }) => res.status(error.status || 502).json(error))
-  })
+  }
+}
 
+module.exports = (app, esConf) => {
+  app.get('/api/search/books/:field/:query', getHitsByField(esConf))
+  app.get('/api/suggest/:field/:query', getSuggestionsByField(esConf))
 }
