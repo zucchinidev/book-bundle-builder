@@ -1,12 +1,16 @@
-import { RunTimeException } from './RunTimeException'
+const { RunTimeException } = require('./RunTimeException')
 
-export class RequiredParamException extends RunTimeException {
+class RequiredParamException extends RunTimeException {
   constructor (...params) {
     super(...params)
     Error.captureStackTrace(this, this.constructor)
   }
 }
 
-export function required (param) {
+function required (param) {
   throw new RequiredParamException(`Required parameter, "${param}" is mandatory.`)
+}
+
+module.exports = {
+  required
 }
