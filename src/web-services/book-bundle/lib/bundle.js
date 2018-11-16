@@ -111,10 +111,34 @@ function deleteBookInBundle (esConf) {
 }
 
 module.exports = (app, esConf) => {
+  /**
+   * Create a new bundle with the specified name.
+   * curl -X POST http://<host>:<port>/api/bundle?name=<name>
+   */
   app.post('/api/bundle', createBundle(esConf))
+  /**
+   * Retrieve a given bundle.
+   * curl http://<host>:<port>/api/bundle/<id>
+   */
   app.get('/api/bundle/:id', getBundleById(esConf))
+  /**
+   * Set the specified bundle's name with the specified name.
+   * curl -X PUT http://<host>:<port>/api/bundle/<id>/name/<name>
+   */
   app.put('/api/bundle/:id/name/:name', setBundleName(esConf))
+  /**
+   * Put a book into a bundle by its id.
+   * curl -X PUT http://<host>:<port>/api/bundle/<id>/book/<pgid>
+   */
   app.put('/api/bundle/:id/book/:pgid', insertBookInBundle(esConf))
-  app.delete('/api/bundle/:id', deleteBundle(esConf))
+  /**
+   * Remove a book from a bundle.
+   * curl -X DELETE http://<host>:<port>/api/bundle/<id>/book/<pgid>
+   */
   app.delete('/api/bundle/:id/book/:pgid', deleteBookInBundle(esConf))
+  /**
+   * Delete a bundle entirely.
+   * curl -X DELETE http://<host>:<port>/api/bundle/<id>
+   */
+  app.delete('/api/bundle/:id', deleteBundle(esConf))
 }
