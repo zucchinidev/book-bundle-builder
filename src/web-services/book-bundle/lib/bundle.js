@@ -85,10 +85,36 @@ function deleteBundle (esConf) {
   }
 }
 
+function deleteBookInBundle (esConf) {
+  return async function (req, res) {
+    try {
+      const url = `${getUrl(esConf)}/${req.params.id}`
+      const bookId = req.params.pgid
+      const options = { json: true }
+      const { _source: bundle, _version: version } = await request({ ...options, url })
+
+      const idx = bundle.books.findIndex(book => book.id === bookId)
+      const bookNotPresentInBundle = idx === -1
+
+      if (bookNotPresentInBundle) {
+        throw { statusCode: 409, error: { reason: 'Conflict - Bundle does not contains that book.' } }
+      }
+
+      bundle.books.splice(idx, 1)
+
+      const esRes = await request.put({ ...options, body: bundle, url, qs: { version } })
+      res.status(200).json(esRes)
+    } catch (err) {
+      res.status(err.statusCode || 502).json(err.error)
+    }
+  }
+}
+
 module.exports = (app, esConf) => {
   app.post('/api/bundle', createBundle(esConf))
   app.get('/api/bundle/:id', getBundleById(esConf))
   app.put('/api/bundle/:id/name/:name', setBundleName(esConf))
   app.put('/api/bundle/:id/book/:pgid', insertBookInBundle(esConf))
   app.delete('/api/bundle/:id', deleteBundle(esConf))
+  app.delete('/api/bundle/:id/book/:pgid', deleteBookInBundle(esConf))
 }
