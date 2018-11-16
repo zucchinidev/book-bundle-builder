@@ -1,6 +1,7 @@
 'use strict'
 
 import './node_modules/bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap'
 
 const $ = document.body.querySelector.bind(document.body)
 document.body.innerHTML = `
