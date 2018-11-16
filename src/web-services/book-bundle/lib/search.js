@@ -1,10 +1,7 @@
 'use strict'
 
 const request = require('request-promise')
-
-function requiredParam (param) {
-  throw new Error(`Param ${param} is mandatory`)
-}
+const { requiredParam } = require('./RequiredParamException')
 
 function getUrl ({
                    host = requiredParam('port'),
