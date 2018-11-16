@@ -73,9 +73,22 @@ function insertBookInBundle (esConf) {
   }
 }
 
+function deleteBundle (esConf) {
+  return async function (req, res) {
+    try {
+      const url = `${getUrl(esConf)}/${req.params.id}`
+      const esRes = await request.delete({ json: true, url })
+      res.status(204).json(esRes)
+    } catch (err) {
+      res.status(err.statusCode || 502).json(err.error)
+    }
+  }
+}
+
 module.exports = (app, esConf) => {
   app.post('/api/bundle', createBundle(esConf))
   app.get('/api/bundle/:id', getBundleById(esConf))
   app.put('/api/bundle/:id/name/:name', setBundleName(esConf))
   app.put('/api/bundle/:id/book/:pgid', insertBookInBundle(esConf))
+  app.delete('/api/bundle/:id', deleteBundle(esConf))
 }
