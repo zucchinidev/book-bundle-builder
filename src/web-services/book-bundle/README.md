@@ -1,3 +1,25 @@
+# Book bundle
+
+### What is a book bundle?
+
+It's a collection of related books.
+
+```json
+{
+    "name": "light reading",
+    "books": [{
+        "id": "pg132",
+        "title": "The Art of War"
+    }, {
+        "id": "pg2680",
+        "title": "Meditations",
+    }, {
+        "id": "pg6456",
+        "title": "Public Opinion"
+    }]
+}
+```
+
 
 
 The nconf module manages configuration settings through a customizable
