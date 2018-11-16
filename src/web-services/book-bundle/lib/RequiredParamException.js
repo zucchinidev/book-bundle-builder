@@ -7,6 +7,6 @@ export class RequiredParamException extends RunTimeException {
   }
 }
 
-export function requiredParam (param) {
+export function required (param) {
   throw new RequiredParamException(`Required parameter, "${param}" is mandatory.`)
 }

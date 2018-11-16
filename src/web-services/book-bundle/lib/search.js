@@ -1,13 +1,9 @@
 'use strict'
 
 const request = require('request-promise')
-const { requiredParam } = require('./RequiredParamException')
+const { required } = require('./RequiredParamException')
 
-function getUrl ({
-                   host = requiredParam('port'),
-                   port = requiredParam('port'),
-                   books_index = requiredParam('books_index')
-                 }) {
+function getUrl ({ host = required('host'), port = required('port'), books_index = required('books_index') }) {
   return `http://${host}:${port}/${books_index}/book/_search`
 }
 
