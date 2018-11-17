@@ -1,6 +1,7 @@
 import '../node_modules/bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap'
 import * as templates from './templates'
+import { main } from './templates'
 
 const $ = document.body.querySelector.bind(document.body)
 document.body.innerHTML = templates.main()
@@ -36,6 +37,11 @@ const listBundles = bundles => {
     const name = form.querySelector('input').value
     name && addBundle(name)
   })
+
+  const deleteButtons = mainElement.querySelectorAll('button.delete')
+  for (const button of deleteButtons) {
+    button.addEventListener('click', () => deleteBundle(button.dataset.bundleId))
+  }
 }
 
 const showAlert = (message, type = 'danger') => {
@@ -50,6 +56,20 @@ const addBundle = async (name) => {
     bundles.push({ id: res._id, name })
     listBundles(bundles)
     showAlert(`Bundle "${name}" created!`, 'success')
+  } catch (err) {
+    showAlert(err)
+  }
+}
+
+const deleteBundle = async (bundleId) => {
+  try {
+    const bundles = await getBundles()
+    const idx = bundles.findIndex(b => b.id === bundleId)
+    const url = `/api/bundle/${bundleId}`
+    await fetch(url, { method: 'DELETE' })
+    bundles.splice(idx, 1)
+    listBundles(bundles)
+    showAlert(`Bundle deleted!`, 'success')
   } catch (err) {
     showAlert(err)
   }

@@ -15,7 +15,7 @@ export const listBundles = Handlebars.compile(`
           <a href="#view-bundle/{{id}}">{{name}}</a>
         </td>
         <td>
-          <butt1on class="btn btn-default delete" data-bundle-id="{{id}}">Delete</butt1on>
+          <button class="btn btn-default delete" data-bundle-id="{{id}}">Delete</button>
         </td>
       </tr>
       {{/each}}
