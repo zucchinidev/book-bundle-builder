@@ -5,15 +5,25 @@ import 'bootstrap'
 import * as templates from './templates'
 
 const $ = document.body.querySelector.bind(document.body)
-document.body.innerHTML = templates.main()
-const mainElement = $('.b4-main')
-const alertsElement = $('.b4-alerts')
+
+const fetchJson = async (url, method = 'GET') => {
+  try {
+    return (await fetch(url, { method, credentials: 'same-origin' })).json()
+  } catch (error) {
+    return { error }
+  }
+}
 
 const showView = async () => {
   const [view, ...params] = window.location.hash.split('/')
   switch (view) {
     case '#welcome':
-      mainElement.innerHTML = templates.welcome()
+      const mainElement = $('.b4-main')
+      const session = await fetchJson('/api/session')
+      mainElement.innerHTML = templates.welcome({ session })
+      if (session.error) {
+        showAlert(session.error)
+      }
       break
     case '#list-bundles':
       const bundles = await getBundles()
@@ -31,6 +41,7 @@ const getBundles = async () => {
 }
 
 const listBundles = bundles => {
+  const mainElement = $('.b4-main')
   mainElement.innerHTML = templates.addBundleForm() + templates.listBundles({ bundles })
   const form = $('form')
   form.addEventListener('submit', event => {
@@ -46,6 +57,7 @@ const listBundles = bundles => {
 }
 
 const showAlert = (message, type = 'danger') => {
+  const alertsElement = $('.b4-alerts')
   alertsElement.insertAdjacentHTML('beforeend', templates.alert({ type, message }))
 }
 
@@ -76,5 +88,9 @@ const deleteBundle = async (bundleId) => {
   }
 }
 
-window.addEventListener('hashchange', showView)
-showView().catch(() => window.location.hash = '#welcome')
+(async () => {
+  const session = await fetchJson('/api/session')
+  document.body.innerHTML = templates.main({ session })
+  window.addEventListener('hashchange', showView)
+  showView().catch(() => window.location.hash = '#welcome')
+})()

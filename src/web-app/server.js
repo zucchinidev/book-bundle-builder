@@ -5,6 +5,7 @@ const morgan = require('morgan')
 const nconf = require('nconf')
 const pkg = require('./package')
 const expressSession = require('express-session')
+const passport = require('passport')
 
 const webpack = require('webpack')
 const webpackDevMiddleware = require('webpack-dev-middleware')
@@ -41,9 +42,28 @@ if (isDev) {
 
 }
 
+passport.serializeUser((profile, done) => done(null, {
+  id: profile.id,
+  provide: profile.provide
+}))
+
+passport.deserializeUser((user, done) => done(null, user))
+app.use(passport.initialize())
+app.use(passport.session())
+
 app.get('/api/version', (req, res) => res.status(200).send(pkg.version))
 require('./lib/search')(app, conf)
 require('./lib/bundle')(app, conf)
+
+app.get('/api/session', (req, res) => {
+  const session = { auth: req.isAuthenticated() }
+  res.status(200).json(session)
+})
+
+app.get('/auth/signout', (req, res) => {
+  req.logout()
+  res.redirect('/')
+})
 
 if (isDev) {
 

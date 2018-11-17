@@ -68,26 +68,26 @@ export const welcome = Handlebars.compile(`
   <h1>Welcome!</h1>
   <p>B4 is an application for creating book bundles.</p>
   {{#if session.auth}}
-  <p>View your <a href="#list-bundles">bundles</a>.</p>
-{{else}}
-<p>Sign in with any of these services to begin.</p>
-<div class="row">
-  <div class="col-sm-6">
-    <a href="/auth/facebook" class="btn btn-block btn-social btn-facebook">
-      Sign in with Facebook
-      <span class="fa fa-facebook"></span>
-    </a>
-    <a href="/auth/twitter" class="btn btn-block btn-social btn-twitter">
-      Sign in with Twitter
-      <span class="fa fa-twitter"></span>
-    </a>
-    <a href="/auth/google" class="btn btn-block btn-social btn-google">
-      Sign in with Google
-      <span class="fa fa-google"></span>
-    </a>
-  </div>
-</div>
-{{/if}}  
+    <p>View your <a href="#list-bundles">bundles</a>.</p>
+  {{else}}
+    <p>Sign in with any of these services to begin.</p>
+    <div class="row">
+      <div class="col-sm-6">
+        <a href="/auth/facebook" class="btn btn-block btn-social btn-facebook">
+          Sign in with Facebook
+          <span class="fa fa-facebook"></span>
+        </a>
+        <a href="/auth/twitter" class="btn btn-block btn-social btn-twitter">
+          Sign in with Twitter
+          <span class="fa fa-twitter"></span>
+        </a>
+        <a href="/auth/google" class="btn btn-block btn-social btn-google">
+          Sign in with Google
+          <span class="fa fa-google"></span>
+        </a>
+      </div>
+    </div>
+  {{/if}}  
 </div>
 `)
 
