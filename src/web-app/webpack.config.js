@@ -14,7 +14,14 @@ module.exports = {
   },
   devServer: {
     contentBase: distDir,
-    port: 60800
+    port: 60800,
+    proxy: {
+      '/api': 'http://localhost:8080',
+      '/es': {
+        target: 'http://localhost:9200',
+        pathRewrite: { '^/es': '' }
+      }
+    }
   },
   resolve: {
     extensions: ['.js', '.ts']
