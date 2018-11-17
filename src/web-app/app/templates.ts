@@ -47,17 +47,47 @@ export const addBundleForm = Handlebars.compile(`
 `)
 
 export const main = Handlebars.compile(`
-<div class="container"> 
+<div class="container-fluid">
+{{#if session.auth}}
+  <div class="collapse navbar-collapse">
+    <ul class="nav navbar-nav navbar-right">
+      <li><a href="#list-bundles">My Bundles</a></li>
+      <li><a href="/auth/signout">Sign Out</a></li>
+    </ul>
+  </div><!-- /.navbar-collapse -->
+{{/if}} 
   <h1>B4 - Book Bundler</h1>
   <div class="b4-alerts"></div> 
-  <div class="b4-main"></div> 
+  <div class="b4-main"></div>
+  
 </div>
 `)
 
 export const welcome = Handlebars.compile(`
 <div class="jumbotron">
   <h1>Welcome!</h1>
-  <p>B4 is an application for creating book bundles.</p>  
+  <p>B4 is an application for creating book bundles.</p>
+  {{#if session.auth}}
+  <p>View your <a href="#list-bundles">bundles</a>.</p>
+{{else}}
+<p>Sign in with any of these services to begin.</p>
+<div class="row">
+  <div class="col-sm-6">
+    <a href="/auth/facebook" class="btn btn-block btn-social btn-facebook">
+      Sign in with Facebook
+      <span class="fa fa-facebook"></span>
+    </a>
+    <a href="/auth/twitter" class="btn btn-block btn-social btn-twitter">
+      Sign in with Twitter
+      <span class="fa fa-twitter"></span>
+    </a>
+    <a href="/auth/google" class="btn btn-block btn-social btn-google">
+      Sign in with Google
+      <span class="fa fa-google"></span>
+    </a>
+  </div>
+</div>
+{{/if}}  
 </div>
 `)
 

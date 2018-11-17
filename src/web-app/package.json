@@ -15,8 +15,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bootstrap-social": "5.1.1",
     "express": "4.16.4",
     "express-session": "1.15.6",
+    "font-awesome": "4.7.0",
     "morgan": "1.9.1",
     "nconf": "0.10.0",
     "request": "2.88.0",
