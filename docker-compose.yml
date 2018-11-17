@@ -17,19 +17,19 @@ services:
 
   node:
     build:
-      context: src/web-services/book-bundle
+      context: src/web-app
       args:
         app_env: ${APP_ENV}
     volumes:
-    - ./src/web-services/book-bundle:/usr/src/app
-    - ./src/web-services/book-bundle/node_modules:/usr/src/app/node_modules
+    - ./src/web-app:/usr/src/app
+    - ./src/web-app/node_modules:/usr/src/app/node_modules
     ports:
     - "8080:8080"
     command: npm run start-dev
     networks:
       nodejs:
         aliases:
-        - web-service
+        - web-app
 
 networks:
   nodejs:

@@ -4,12 +4,25 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start-client": "webpack-dev-server",
+    "start": "node server.js",
+    "start-dev": "node_modules/nodemon/bin/nodemon.js server.js",
+    "test": "jest --config test/jest.conf.js",
+    "test:coverage": "jest --config test/jest.conf.js --coverage",
+    "lint": "eslint src/**"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "dependencies": {
+    "express": "4.16.4",
+    "express-session": "1.15.6",
+    "morgan": "1.9.1",
+    "nconf": "0.10.0",
+    "request": "2.88.0",
+    "request-promise": "4.2.2",
+    "session-file-store": "1.1.2"
+  },
   "devDependencies": {
     "bootstrap": "3.3.7",
     "css-loader": "0.28.7",
@@ -22,6 +35,15 @@
     "typescript": "2.5.3",
     "url-loader": "0.6.2",
     "webpack": "3.6.0",
-    "webpack-dev-server": "2.9.1"
+    "webpack-dev-server": "2.9.1",
+    "eslint": "5.3.0",
+    "eslint-config-standard": "11.0.0",
+    "eslint-plugin-import": "2.14.0",
+    "eslint-plugin-jest": "21.21.0",
+    "eslint-plugin-node": "7.0.1",
+    "eslint-plugin-promise": "3.8.0",
+    "eslint-plugin-standard": "3.1.0",
+    "jest": "23.5.0",
+    "nodemon": "1.18.6"
   }
 }

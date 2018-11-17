@@ -18,7 +18,7 @@ module.exports = {
     proxy: {
       '/api': 'http://localhost:8080',
       '/es': {
-        target: 'http://localhost:9200',
+        target: 'http://elasticsearch:9200',
         pathRewrite: { '^/es': '' }
       }
     }
