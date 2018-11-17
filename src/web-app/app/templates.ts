@@ -1,5 +1,51 @@
 import * as Handlebars from '../node_modules/handlebars/dist/handlebars'
 
+export const listBundles = Handlebars.compile(`
+<div class="panel panel-default">
+  <div class="panel-heading">Your Bundles</div>
+  {{#if bundles.length}}
+    <table class="table">
+      <tr>
+        <th>Bundle Name</th>
+        <th>Actions</th>
+      </tr>
+      {{#each bundles}}
+      <tr>
+        <td>
+          <a href="#view-bundle/{{id}}">{{name}}</a>
+        </td>
+        <td>
+          <butt1on class="btn btn-default delete" data-bundle-id="{{id}}">Delete</butt1on>
+        </td>
+      </tr>
+      {{/each}}
+    </table>
+  {{else}}
+    <div class="panel-body">
+      <p>None yet!</p>
+    </div>
+  {{/if}}
+</div>
+`)
+
+export const addBundleForm = Handlebars.compile(`
+<div class="panel panel-default">
+  <div class="panel-heading">
+    Create a new bundle.
+  </div>
+  <div class="panel-body">
+    <form action="">
+      <div class="input-group">
+        <input type="text" class="form-control" placeholder="Bundle Name">
+          <span class="input-group-btn">
+            <button class="btn btn-primary" type="submit">Create</button>
+          </span>
+      </div>
+    </form>
+  </div>
+</div>
+`)
+
 export const main = Handlebars.compile(`
 <div class="container"> 
   <h1>B4 - Book Bundler</h1>
