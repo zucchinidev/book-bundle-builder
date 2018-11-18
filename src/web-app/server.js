@@ -7,6 +7,7 @@ const pkg = require('./package')
 const expressSession = require('express-session')
 const passport = require('passport')
 const FacebookStrategy = require('passport-facebook').Strategy
+const TwitterStrategy = require('passport-twitter').Strategy
 
 const webpack = require('webpack')
 const webpackDevMiddleware = require('webpack-dev-middleware')
@@ -65,6 +66,13 @@ passport.use(new FacebookStrategy({
   callbackURL: new URL('/auth/facebook/callback', serviceUrl).href
 }, verifyUserCallback))
 
+passport.use(new TwitterStrategy({
+  consumerKey: nconf.get('auth:twitter:consumerKey'),
+  consumerSecret: nconf.get('auth:twitter:consumerSecret'),
+  callbackURL: new URL('/auth/twitter/callback', serviceUrl).href
+}, verifyUserCallback))
+
+
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -84,6 +92,12 @@ app.get('/auth/signout', (req, res) => {
 
 app.get('/auth/facebook', passport.authenticate('facebook'))
 app.get('/auth/facebook/callback', passport.authenticate('facebook', {
+  successRedirect: '/',
+  failureRedirect: '/'
+}))
+
+app.get('/auth/twitter', passport.authenticate('twitter'))
+app.get('/auth/twitter/callback', passport.authenticate('twitter', {
   successRedirect: '/',
   failureRedirect: '/'
 }))
