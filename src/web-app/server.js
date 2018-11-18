@@ -8,6 +8,7 @@ const expressSession = require('express-session')
 const passport = require('passport')
 const FacebookStrategy = require('passport-facebook').Strategy
 const TwitterStrategy = require('passport-twitter').Strategy
+const GoogleStrategy = require('passport-google-oauth20').Strategy
 
 const webpack = require('webpack')
 const webpackDevMiddleware = require('webpack-dev-middleware')
@@ -72,6 +73,13 @@ passport.use(new TwitterStrategy({
   callbackURL: new URL('/auth/twitter/callback', serviceUrl).href
 }, verifyUserCallback))
 
+passport.use(new GoogleStrategy({
+  clientID: nconf.get('auth:google:clientID'),
+  clientSecret: nconf.get('auth:google:clientSecret'),
+  callbackURL: new URL('/auth/google/callback', serviceUrl).href,
+  scope: 'https://www.googleapis.com/auth/plus.login'
+}, verifyUserCallback))
+
 
 app.use(passport.initialize())
 app.use(passport.session())
@@ -98,6 +106,12 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', {
 
 app.get('/auth/twitter', passport.authenticate('twitter'))
 app.get('/auth/twitter/callback', passport.authenticate('twitter', {
+  successRedirect: '/',
+  failureRedirect: '/'
+}))
+
+app.get('/auth/google', passport.authenticate('google', {scope: ['email', 'profile']}))
+app.get('/auth/google/callback', passport.authenticate('google', {
   successRedirect: '/',
   failureRedirect: '/'
 }))
