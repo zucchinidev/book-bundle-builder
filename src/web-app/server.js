@@ -6,6 +6,7 @@ const nconf = require('nconf')
 const pkg = require('./package')
 const expressSession = require('express-session')
 const passport = require('passport')
+const FacebookStrategy = require('passport-facebook').Strategy
 
 const webpack = require('webpack')
 const webpackDevMiddleware = require('webpack-dev-middleware')
@@ -48,6 +49,22 @@ passport.serializeUser((profile, done) => done(null, {
 }))
 
 passport.deserializeUser((user, done) => done(null, user))
+/**
+ * Since we’re not storing per-user data, the profile really is all we need,
+ * so we call done() immediately with it. In the future, we may need to do
+ * something fancier here, like reach out to a database to retrieve user information
+ * Note that the profile object here is exactly the input to the serializeUser() callback function
+ * that you gave to Passport. We may end up doing something more complex to resolve the user
+ * after Facebook sign-in. If we do, make sure you also update your Passport serialization
+ * code since these profile objects must match.
+ */
+const verifyUserCallback = (accessToken, refreshToken, profile, done) => done(null, profile)
+passport.use(new FacebookStrategy({
+  clientID: nconf.get('auth:facebook:appID'),
+  clientSecret: nconf.get('auth:facebook:appSecret'),
+  callbackURL: new URL('/auth/facebook/callback', serviceUrl).href
+}, verifyUserCallback))
+
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -64,6 +81,12 @@ app.get('/auth/signout', (req, res) => {
   req.logout()
   res.redirect('/')
 })
+
+app.get('/auth/facebook', passport.authenticate('facebook'))
+app.get('/auth/facebook/callback', passport.authenticate('facebook', {
+  successRedirect: '/',
+  failureRedirect: '/'
+}))
 
 if (isDev) {
 
