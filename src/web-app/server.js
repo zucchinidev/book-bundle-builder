@@ -85,6 +85,7 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 app.get('/api/version', (req, res) => res.status(200).send(pkg.version))
+app.use('/api', require('./lib/bundle')(conf))
 require('./lib/search')(app, conf)
 require('./lib/bundle')(app, conf)
 

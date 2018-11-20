@@ -1,5 +1,7 @@
 'use strict'
 const request = require('request-promise')
+const express = require('express')
+
 const getBookUrl = require('./search').getBookUrl
 const { required } = require('./RequiredParamException')
 
@@ -11,7 +13,7 @@ function createBundle (esConf) {
   return async function (req, res) {
     try {
       const name = req.query.name || ''
-      const bundle = { name, books: [] }
+      const bundle = { name, books: [], userKey: getUserKey(req) }
       const esRes = await request.post({ url: getUrl(esConf), body: bundle, json: true })
       res.status(201).json(esRes)
     } catch (err) {
@@ -23,11 +25,18 @@ function createBundle (esConf) {
 function getBundleById (esConf) {
   return async function (req, res) {
     try {
-      const url = `${getUrl(esConf)}/${req.params.id}`
-      const esRes = await request.get({ url, json: true })
-      res.status(201).json(esRes)
+      const id = req.params.id
+      const url = `${getUrl(esConf)}/${id}`
+      const { _source: bundle } = await request.get({ url, json: true })
+      if (bundle.userKey !== getUserKey(req)) {
+        throw {
+          statusCode: 403,
+          error: 'You are not authorized to view this bundle'
+        }
+      }
+      res.status(201).json({ id, bundle })
     } catch (err) {
-      res.status(err.statusCode || 502).json(err.error)
+      res.status(err.statusCode || 502).json(err.error || err)
     }
   }
 }
@@ -38,11 +47,17 @@ function setBundleName (esConf) {
       const url = `${getUrl(esConf)}/${req.params.id}`
       const options = { url, json: true }
       const bundle = (await request(options))._source
+      if (bundle.userKey !== getUserKey(req)) {
+        throw {
+          statusCode: 403,
+          error: 'Yoy are not authorized to modify this bundle.'
+        }
+      }
       bundle.name = req.params.name
       const esRes = await request.put({ ...options, body: bundle })
       res.status(200).json(esRes)
     } catch (err) {
-      res.status(err.statusCode || 502).json(err.error)
+      res.status(err.statusCode || 502).json(err.error || err)
     }
   }
 }
@@ -59,6 +74,13 @@ function insertBookInBundle (esConf) {
         request({ ...options, url: bookUrl })
       ])
 
+      if (bundle.userKey !== getUserKey(req)) {
+        throw {
+          statusCode: 403,
+          error: 'Yoy are not authorized to modify this bundle.'
+        }
+      }
+
       const bookNotPresentInBundle = bundle.books.findIndex(book => book.id === bookId) === -1
 
       if (bookNotPresentInBundle) {
@@ -68,7 +90,7 @@ function insertBookInBundle (esConf) {
       const esRes = await request.put({ ...options, body: bundle, url, qs: { version } })
       res.status(200).json(esRes)
     } catch (err) {
-      res.status(err.statusCode || 502).json(err.error)
+      res.status(err.statusCode || 502).json(err.error || err)
     }
   }
 }
@@ -77,7 +99,14 @@ function deleteBundle (esConf) {
   return async function (req, res) {
     try {
       const url = `${getUrl(esConf)}/${req.params.id}`
-      const esRes = await request.delete({ json: true, url })
+      const { _source: bundle, _version: version } = await request({ ...options, url })
+      if (bundle.userKey !== getUserKey(req)) {
+        throw {
+          statusCode: 403,
+          error: 'Yoy are not authorized to modify this bundle.'
+        }
+      }
+      const esRes = await request.delete({ json: true, url, qs: { version } })
       res.status(204).json(esRes)
     } catch (err) {
       res.status(err.statusCode || 502).json(err.error)
@@ -92,7 +121,9 @@ function deleteBookInBundle (esConf) {
       const bookId = req.params.pgid
       const options = { json: true }
       const { _source: bundle, _version: version } = await request({ ...options, url })
-
+      if (bundle.userKey !== getUserKey(req)) {
+        throw { statusCode: 403, error: 'You are not authorized to modify this bundle.' }
+      }
       const idx = bundle.books.findIndex(book => book.id === bookId)
       const bookNotPresentInBundle = idx === -1
 
@@ -105,40 +136,78 @@ function deleteBookInBundle (esConf) {
       const esRes = await request.put({ ...options, body: bundle, url, qs: { version } })
       res.status(200).json(esRes)
     } catch (err) {
-      res.status(err.statusCode || 502).json(err.error)
+      res.status(err.statusCode || 502).json(err.error || err)
     }
   }
 }
 
-module.exports = (app, esConf) => {
+const getUserKey = ({ user: { provider, id } }) => `${provider}-${id}`
+
+function getListBundles (esConf) {
+  return async function (req, res) {
+    try {
+      const url = `${getUrl(esConf)}/_search`
+      const body = {
+        size: 1000,
+        query: { match: { userKey: getUserKey(req) } }
+      }
+      const options = { json: true, url, body }
+      const response = await request(options)
+      const bundles = response.hits.hits.map(({ _id: id, _source: { name } }) => ({ id, name }))
+      res.status(200).json(bundles)
+    } catch (err) {
+      console.log(err)
+      res.status(err.statusCode || 502).json(err.error || err)
+    }
+  }
+}
+
+module.exports = esConf => {
+  const router = express.Router()
+  router.use((req, res, next) => {
+    if (!req.isAuthenticated()) {
+      res.status(403).json({
+        error: 'You must sign in to use this service'
+      })
+      return
+    }
+    next()
+  })
+
+  /**
+   * List bundles for the currently authenticated user.
+   */
+  router.get('/list-bundles', getListBundles(esConf))
+
   /**
    * Create a new bundle with the specified name.
-   * curl -X POST http://<host>:<port>/api/bundle?name=<name>
+   * curl -X POST http://<host>:<port>/bundle?name=<name>
    */
-  app.post('/api/bundle', createBundle(esConf))
+  router.post('/bundle', createBundle(esConf))
   /**
    * Retrieve a given bundle.
-   * curl http://<host>:<port>/api/bundle/<id>
+   * curl http://<host>:<port>/bundle/<id>
    */
-  app.get('/api/bundle/:id', getBundleById(esConf))
+  router.get('/bundle/:id', getBundleById(esConf))
   /**
    * Set the specified bundle's name with the specified name.
-   * curl -X PUT http://<host>:<port>/api/bundle/<id>/name/<name>
+   * curl -X PUT http://<host>:<port>/bundle/<id>/name/<name>
    */
-  app.put('/api/bundle/:id/name/:name', setBundleName(esConf))
+  router.put('/bundle/:id/name/:name', setBundleName(esConf))
   /**
    * Put a book into a bundle by its id.
-   * curl -X PUT http://<host>:<port>/api/bundle/<id>/book/<pgid>
+   * curl -X PUT http://<host>:<port>/bundle/<id>/book/<pgid>
    */
-  app.put('/api/bundle/:id/book/:pgid', insertBookInBundle(esConf))
+  router.put('/bundle/:id/book/:pgid', insertBookInBundle(esConf))
   /**
    * Remove a book from a bundle.
-   * curl -X DELETE http://<host>:<port>/api/bundle/<id>/book/<pgid>
+   * curl -X DELETE http://<host>:<port>/bundle/<id>/book/<pgid>
    */
-  app.delete('/api/bundle/:id/book/:pgid', deleteBookInBundle(esConf))
+  router.delete('/bundle/:id/book/:pgid', deleteBookInBundle(esConf))
   /**
    * Delete a bundle entirely.
-   * curl -X DELETE http://<host>:<port>/api/bundle/<id>
+   * curl -X DELETE http://<host>:<port>/bundle/<id>
    */
-  app.delete('/api/bundle/:id', deleteBundle(esConf))
+  router.delete('/bundle/:id', deleteBundle(esConf))
+  return router
 }
