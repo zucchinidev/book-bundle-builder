@@ -26,8 +26,13 @@ const showView = async () => {
       }
       break
     case '#list-bundles':
-      const bundles = await getBundles()
-      listBundles(bundles)
+      try {
+        const bundles = await getBundles()
+        listBundles(bundles)
+      } catch (err) {
+        showAlert(err)
+        window.location.hash = '#welcome'
+      }
       break
     default:
       throw Error(`Unrecognized view: ${view}`)
@@ -35,9 +40,11 @@ const showView = async () => {
 }
 
 const getBundles = async () => {
-  const res = await fetch('/es/book-bundle/bundle/_search?size=100')
-  const body = await res.json()
-  return body.hits.hits.map(({ _id: id, _source: { name } }) => ({ id, name }))
+  const bundles = await fetchJson('/api/list-bundles')
+  if (bundles.error) {
+    throw bundles.error
+  }
+  return bundles
 }
 
 const listBundles = bundles => {
